@@ -27,7 +27,6 @@ namespace DI.SimpleNote {
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
-			Vector2 size = EditorStyles.helpBox.CalcSize(new GUIContent(((HelpBoxAttribute)attribute).note));
 			Rect helpBoxRect = new Rect(position.x, position.y, position.width, EditorStyles.helpBox.CalcHeight(new GUIContent(((HelpBoxAttribute)attribute).note), position.width));
 			Rect propertyRect = position;
 			propertyRect.y = position.y + helpBoxRect.height + EditorGUIUtility.singleLineHeight * .2f;

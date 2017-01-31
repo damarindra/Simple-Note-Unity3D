@@ -5,30 +5,64 @@ using System.Collections.Generic;
 using UnityEditor;
 #endif
 
-namespace DI.SimpleNote {
-	public class SimpleNoteManager : MonoBehaviour {
-		public static SimpleNoteManager Instance { get { return GetInstance();  } }
+namespace DI.SimpleNote
+{
+	public class SimpleNoteSO : ScriptableObject
+	{
+		public static SimpleNoteSO Instance { get { return GetInstance(); } }
 		public bool Hide { get; set; }
-		static SimpleNoteManager GetInstance() {
-			SimpleNoteManager _instance = FindObjectOfType<SimpleNoteManager>();
-			if (_instance == null) {
-				GameObject instance = new GameObject("NoteManager");
-				instance.hideFlags = HideFlags.HideInHierarchy;
-				_instance = instance.AddComponent<SimpleNoteManager>();
+		static SimpleNoteSO GetInstance()
+		{
+			SimpleNoteSO _instance = FindObjectOfType<SimpleNoteSO>();
+			if (_instance == null)
+			{
+				//OLD
+				//GameObject instance = new GameObject("NoteManager");
+				//instance.hideFlags = HideFlags.HideInHierarchy;
+				//_instance = instance.AddComponent<SimpleNoteManager>();
+				_instance = ScriptableObject.CreateInstance<SimpleNoteSO>();
 			}
+			if (!_instance._oldImplemantationChecked) {
+				GameObject[] go = FindObjectsOfType<GameObject>();
+				foreach (GameObject g in go)
+				{
+					Component[] components = g.GetComponents<Component>();
+					for (int i = 0; i < components.Length; i++)
+					{
+						if (components[i] == null && g.hideFlags == HideFlags.HideInHierarchy && g.name == "NoteManager")
+						{
+							string s = g.name;
+							Transform t = g.transform;
+							while (t.parent != null)
+							{
+								s = t.parent.name + "/" + s;
+								t = t.parent;
+							}
+							Debug.Log(s + " : is old method. Now fixed..");
+							DestroyImmediate(g);
+						}
+					}
+				}
+			}
+				_instance._oldImplemantationChecked = false;
 			return _instance;
 		}
-		
+
+		private bool _oldImplemantationChecked = false;
+
 		[System.Serializable]
-		public class GameObjectNote {
+		public class GameObjectNote
+		{
 			public GameObject gameObject;
 			public Note note = new Note();
 			public bool hide = false;
 
-			public GameObjectNote(GameObject gameObject) {
+			public GameObjectNote(GameObject gameObject)
+			{
 				this.gameObject = gameObject;
 			}
-			public GameObjectNote(GameObject gameObject, string title, string note) {
+			public GameObjectNote(GameObject gameObject, string title, string note)
+			{
 				this.gameObject = gameObject;
 				this.note.title = title;
 				this.note.note = note;
@@ -92,7 +126,8 @@ namespace DI.SimpleNote {
 	}
 
 #if UNITY_EDITOR
-	public class SimpleNoteManagerMenu {
+	public class SimpleNoteManagerMenu
+	{
 
 		[MenuItem("GameObject/SimpleNote/Add or Remove Note", priority = 0)]
 		public static void AddRemoveNote()
@@ -103,17 +138,17 @@ namespace DI.SimpleNote {
 			{
 				foreach (GameObject obj in Selection.gameObjects)
 				{
-					if (SimpleNoteManager.Instance.getIndexGameObjectNote(obj) != -1)
-						SimpleNoteManager.Instance.gameObjectNote.RemoveAt(SimpleNoteManager.Instance.getIndexGameObjectNote(obj));
+					if (SimpleNoteSO.Instance.getIndexGameObjectNote(obj) != -1)
+						SimpleNoteSO.Instance.gameObjectNote.RemoveAt(SimpleNoteSO.Instance.getIndexGameObjectNote(obj));
 					else
 					{
-						SimpleNoteManager.Instance.gameObjectNote.Add(new SimpleNoteManager.GameObjectNote(obj, obj.name, "Note"));
+						SimpleNoteSO.Instance.gameObjectNote.Add(new SimpleNoteSO.GameObjectNote(obj, obj.name, "Note"));
 					}
 #if UNITY_5_0 || UNITY_5_1 || UNITY_5_2
 #else
 					UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 #endif
-					EditorUtility.SetDirty(SimpleNoteManager.Instance);
+					EditorUtility.SetDirty(SimpleNoteSO.Instance);
 				}
 			}
 		}
