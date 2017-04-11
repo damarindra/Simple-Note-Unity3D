@@ -79,7 +79,29 @@ namespace DI.SimpleNote {
 					if (GUILayout.Button("Save", GUILayout.Width(45), GUILayout.Height(15)))
 						GUI.FocusControl(null);
 				}*/
-				
+				if(index != 0)
+				{
+					if (GUILayout.Button("\u2191", GUILayout.Width(15), GUILayout.Height(15)))
+					{
+						Undo.RecordObject(SimpleNoteData.Instance, "Swap Note");
+						SimpleNoteData.Instance.notes[index] = SimpleNoteData.Instance.notes[index - 1];
+						SimpleNoteData.Instance.notes[index - 1] = note;
+						break;
+					}
+				}
+				if (index != SimpleNoteData.Instance.notes.Count - 1)
+				{
+					if (GUILayout.Button("\u2193", GUILayout.Width(15), GUILayout.Height(15)))
+					{
+						Undo.RecordObject(SimpleNoteData.Instance, "Swap Note");
+						SimpleNoteData.Instance.notes[index] = SimpleNoteData.Instance.notes[index + 1];
+						SimpleNoteData.Instance.notes[index + 1] = note;
+						break;
+					}
+				}
+				else {
+					GUILayout.Label("", GUILayout.Width(15));
+				}
 				if (GUILayout.Button("-", GUILayout.Width(15), GUILayout.Height(15)))
 				{
 					if (hideNoteIndex.Contains(index))

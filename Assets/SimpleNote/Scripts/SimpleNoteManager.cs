@@ -8,29 +8,37 @@ using UnityEditor;
 namespace DI.SimpleNote {
 	[SimpleNote("Note Manager", "This script doesn't effect on gameplay. Only run at Unity Editor.")]
 	public class SimpleNoteManager : MonoBehaviour {
-		public static SimpleNoteManager Instance { get { return GetInstance();  } }
+		public static SimpleNoteManager Instance { get { return GetInstance(); } }
 		public bool Hide { get; set; }
 		static SimpleNoteManager GetInstance() {
 			SimpleNoteManager _instance = FindObjectOfType<SimpleNoteManager>();
+			//Delete the old implementation
+			if (_instance != null) {
+				if (_instance.hideFlags == HideFlags.HideInHierarchy) {
+					System.Type type = _instance.GetType();
+					GameObject destination = new GameObject("NoteManager");
+					SimpleNoteManager copy = destination.AddComponent<SimpleNoteManager>();
+					// Copied fields can be restricted with BindingFlags
+					System.Reflection.FieldInfo[] fields = type.GetFields();
+					foreach (System.Reflection.FieldInfo field in fields)
+					{
+						Debug.Log("Are you here?");
+						field.SetValue(copy, field.GetValue(_instance));
+					}
+					DestroyImmediate(_instance.gameObject);
+					_instance = copy;
+				}
+			}
+			return _instance;
+		}
+		public static SimpleNoteManager Init()
+		{
+			SimpleNoteManager _instance = GetInstance();
 			if (_instance == null)
 			{
 				GameObject instance = new GameObject("NoteManager");
 				//instance.hideFlags = HideFlags.HideInHierarchy;
 				_instance = instance.AddComponent<SimpleNoteManager>();
-			}
-			//Delete the old implementation
-			else if (_instance.hideFlags == HideFlags.HideInHierarchy) {
-				System.Type type = _instance.GetType();
-				GameObject destination = new GameObject("NoteManager");
-				SimpleNoteManager copy = destination.AddComponent<SimpleNoteManager>();
-				// Copied fields can be restricted with BindingFlags
-				System.Reflection.FieldInfo[] fields = type.GetFields();
-				foreach (System.Reflection.FieldInfo field in fields)
-				{
-					field.SetValue(copy, field.GetValue(_instance));
-				}
-				DestroyImmediate(_instance.gameObject);
-				_instance = copy;
 			}
 			return _instance;
 		}
@@ -118,6 +126,8 @@ namespace DI.SimpleNote {
 			{
 				foreach (GameObject obj in Selection.gameObjects)
 				{
+					if (SimpleNoteManager.Instance == null)
+						SimpleNoteManager.Init();
 					if (SimpleNoteManager.Instance.getIndexGameObjectNote(obj) != -1)
 						SimpleNoteManager.Instance.gameObjectNote.RemoveAt(SimpleNoteManager.Instance.getIndexGameObjectNote(obj));
 					else

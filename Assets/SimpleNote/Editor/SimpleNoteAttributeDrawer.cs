@@ -14,11 +14,13 @@ namespace DI.SimpleNote {
 		void OnEnable()
 		{
 			monoBehaviour = (MonoBehaviour)target;
-			if (SimpleNoteManager.Instance.getIndexAttributeScriptNote(monoBehaviour.gameObject, monoBehaviour) != -1)
-			{
-				index = SimpleNoteManager.Instance.getIndexAttributeScriptNote(monoBehaviour.gameObject, monoBehaviour);
-				title = SimpleNoteManager.Instance.attScriptNote[index].note.title;
-				note = SimpleNoteManager.Instance.attScriptNote[index].note.note;
+			if (SimpleNoteManager.Instance != null) {
+				if (SimpleNoteManager.Instance.getIndexAttributeScriptNote(monoBehaviour.gameObject, monoBehaviour) != -1)
+				{
+					index = SimpleNoteManager.Instance.getIndexAttributeScriptNote(monoBehaviour.gameObject, monoBehaviour);
+					title = SimpleNoteManager.Instance.attScriptNote[index].note.title;
+					note = SimpleNoteManager.Instance.attScriptNote[index].note.note;
+				}
 			}
 			else{
 				title = "Title Here";
@@ -28,10 +30,11 @@ namespace DI.SimpleNote {
 
 		void OnDisable()
 		{
-			if (monoBehaviour == null && index != -1)
+			if (monoBehaviour == null && index != -1 && monoBehaviour.GetType() != typeof(SimpleNoteManager))
 			{
 				//Delete note
-				SimpleNoteManager.Instance.attScriptNote.RemoveAt(index);
+				if(SimpleNoteManager.Instance != null)
+					SimpleNoteManager.Instance.attScriptNote.RemoveAt(index);
 			}
 		}
 	
@@ -44,6 +47,8 @@ namespace DI.SimpleNote {
 			if (attribute != null)
 			{
 				//Check if note stored to manager;
+				if (SimpleNoteManager.Instance == null)
+					SimpleNoteManager.Init();
 				if (SimpleNoteManager.Instance.getIndexAttributeScriptNote(monoBehaviour.gameObject, monoBehaviour) == -1) {
 					if (string.IsNullOrEmpty(attribute.title) && string.IsNullOrEmpty(attribute.note))
 						SimpleNoteManager.Instance.attScriptNote.Add(new SimpleNoteManager.AttributeScriptNote(monoBehaviour.gameObject, monoBehaviour, title, note));
@@ -62,17 +67,10 @@ namespace DI.SimpleNote {
 					textField.normal = EditorStyles.label.normal;
 
 				EditorGUILayout.BeginHorizontal();
-				GUI.SetNextControlName("Title" + monoBehaviour.gameObject.GetInstanceID());
 				title = EditorGUILayout.TextField(title, textField);
-				if (GUI.GetNameOfFocusedControl() == "Title" + monoBehaviour.gameObject.GetInstanceID())
-				{
-					if (GUILayout.Button("Save", GUILayout.Height(15), GUILayout.Width(45)))
-					{
-						//EditorPrefs.SetString(monoBehaviour.GetInstanceID() + "-SimpleNote-Title", title);
-						SimpleNoteManager.Instance.attScriptNote[index].note.title = title;
-						GUI.FocusControl(null);
-					}
-				}
+				//EditorPrefs.SetString(monoBehaviour.GetInstanceID() + "-SimpleNote-Title", title);
+				if(SimpleNoteManager.Instance.attScriptNote[index].note.title != title)
+					SimpleNoteManager.Instance.attScriptNote[index].note.title = title;
 				EditorGUILayout.EndHorizontal();
 
 				GUIStyle textArea = new GUIStyle(EditorStyles.textArea);
@@ -82,17 +80,10 @@ namespace DI.SimpleNote {
 
 				EditorGUILayout.BeginHorizontal();
 
-				GUI.SetNextControlName("Note" + monoBehaviour.gameObject.GetInstanceID());
 				note = EditorGUILayout.TextArea(note, textArea);
-				if (GUI.GetNameOfFocusedControl() == "Note" + monoBehaviour.gameObject.GetInstanceID())
-				{
-					if (GUILayout.Button("Save", GUILayout.Height(15), GUILayout.Width(45)))
-					{
-						//EditorPrefs.SetString(monoBehaviour.GetInstanceID() + "-SimpleNote-Note", note);
-						SimpleNoteManager.Instance.attScriptNote[index].note.note = note;
-						GUI.FocusControl(null);
-					}
-				}
+				//EditorPrefs.SetString(monoBehaviour.GetInstanceID() + "-SimpleNote-Note", note);
+				if(SimpleNoteManager.Instance.attScriptNote[index].note.note != note)
+					SimpleNoteManager.Instance.attScriptNote[index].note.note = note;
 
 				EditorGUILayout.EndHorizontal();
 				EditorGUILayout.Space();

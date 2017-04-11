@@ -16,7 +16,7 @@ namespace DI.SimpleNote {
 
 		private static void onSceneGUIUpdate(SceneView sceneView)
 		{
-			if (Selection.gameObjects.Length == 1)
+			if (Selection.gameObjects.Length == 1 && SimpleNoteManager.Instance != null)
 			{
 				int index = SimpleNoteManager.Instance.getIndexGameObjectNote(Selection.activeGameObject);
 				if (index != -1)
